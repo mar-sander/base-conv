@@ -1,0 +1,903 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BASE CONVERTER - 計算過程が見える進数変換ツール</title>
+<link rel="icon" href="https://raw.githubusercontent.com/mar-sander/assets/refs/heads/main/favicon.ico">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display+SC:ital,wght@0,400;0,700;0,900;1,400;1,700;1,900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@300..700&display=swap');
+
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;}
+body{
+  font-family: "Fira Code", monospace, sans-serif;
+  background:#111;
+  color:#eee;
+  line-height:1.7;
+  padding:24px 16px 20px;
+}
+
+.container{
+  width:min(100%, 960px);
+  margin:0 auto;
+}
+
+.page-header{
+  text-align:left;
+  margin-bottom:28px;
+}
+
+.page-title{
+  margin:30px 0 20px 0;
+  font-family:"Playfair Display SC", serif;
+  font-size:clamp(3.2rem, 10vw, 80px);
+  letter-spacing: -0.14em;
+  font-weight:500;
+  border-bottom:1px solid #ffffff;
+  display:inline-block;
+  padding-bottom:0px;
+  line-height:0.72;
+}
+
+.subtitle{
+  font-size:0.25em;
+  letter-spacing:0.04em;
+  font-weight:700;
+}
+
+.page-subtitle{
+  margin-top:2px;
+  color:#bbb;
+  font-size:0.8rem;
+}
+
+.tool-grid{
+  display:grid;
+  grid-template-columns:1fr;
+  gap:20px;
+}
+
+.section{
+  margin:0;
+  padding:20px;
+  background:#181818;
+  border:1px solid #2d2d2d;
+  border-radius:16px;
+  box-shadow:0 10px 30px rgba(0,0,0,0.28);
+}
+
+h2{
+  margin:0 0 14px;
+  padding-bottom:8px;
+  border-bottom:1px solid #333;
+  font-size:1.15rem;
+}
+
+.control-row{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  flex-wrap:wrap;
+}
+
+input,button{
+  padding:10px 12px;
+  margin:0;
+  font-size:1rem;
+}
+
+input{
+  flex:1 1 220px;
+  min-width:0;
+  background:#101010;
+  color:#eee;
+  border:1px solid #3a3a3a;
+  border-radius:10px;
+  outline:none;
+}
+
+input:focus{
+  border-color:#4fc3f7;
+  box-shadow:0 0 0 3px rgba(79,195,247,0.15);
+}
+
+button{
+  cursor:pointer;
+  border:none;
+  border-radius:10px;
+  background:#2b2b2b;
+  color:#eee;
+  transition:transform 0.2s ease, background 0.2s ease;
+}
+
+button:hover{
+  background:#353535;
+  transform:translateY(-1px);
+}
+
+.reset-btn{
+  padding:8px 6px;
+  margin-left:2px;
+  font-size:0.95rem;
+  background:transparent;
+  border:none;
+  border-radius:0;
+}
+
+.reset-btn i{
+  color:#bbb;
+}
+
+.reset-btn:hover{
+  background:transparent;
+  transform:none;
+}
+
+.reset-btn:hover i{
+  color:#eee;
+  transform:rotate(180deg);
+  transition:transform 0.25s ease, color 0.25s ease;
+}
+
+.step{margin-left:6px;}
+.step-line{display:flex;align-items:center;gap:14px;max-width:320px;margin-top:6px;padding-bottom:6px;border-bottom:1px solid rgba(255,255,255,0.08);} 
+#decimalSteps .step-line:last-child{border-bottom:none;}
+.step-left{min-width:150px;text-align:left;flex:0 0 auto;}
+.step-right{width:24px;text-align:right;flex:0 0 24px;}
+
+.highlight{color:#4fc3f7;font-weight:bold;}
+.dim{color:#666;}
+.result{margin-top:12px;font-weight:bold;font-size:1.08rem;}
+.hint{margin-top:12px;padding:12px 14px;background:#1a1a1a;border-left:3px solid #4fc3f7;border-radius:10px;}
+.note{margin-top:10px;font-size:0.9rem;color:#bbb;}
+.error{color:#ff6b6b;margin-top:10px;}
+.binary-row{display:flex;gap:8px;margin-top:10px;justify-content:flex-start;flex-wrap:wrap;}
+.binary-cell{text-align:center;}
+.read-guide{margin-top:12px;padding:12px;background:#181818;border:1px solid #333;border-radius:10px;}
+.binary-visual{margin:12px 0;padding:12px;background:#141414;border:1px solid #333;border-radius:12px;overflow-x:auto;}
+.output-block{margin-top:12px;}
+
+ul{
+  list-style:none;
+  padding:0;
+  margin:0;
+}
+
+hr{
+  height:1px;
+  border:0;
+  border-top:1px solid #bdbdbd7d;
+}
+
+.footer{
+  font-family:sans-serif;
+  padding-top:50px;
+  font-size:14px;
+  color:#999;
+}
+
+.footer a{
+  color:#999;
+  text-decoration:none;
+}
+
+.footer a:hover{
+  color:#fff;
+  text-decoration:none;
+}
+
+.footer__navi{
+  flex-wrap:wrap;
+  margin-bottom:1.4rem;
+}
+
+.footer__navi li{
+  display:inline-block;
+}
+
+.footer__navi li:not(:last-child){
+  margin-right:16px;
+}
+
+.footer__logo{
+  display:inline-block;
+  margin-bottom:0.5rem;
+}
+
+.copyright{
+  font-size:12px;
+}
+
+@media (max-width: 768px){
+  body{padding:18px 12px 36px;}
+  .tool-grid{gap:16px;}
+  .section{padding:16px;border-radius:14px;}
+  .control-row{align-items:stretch;}
+  input{flex:1 1 100%;width:100%;}
+  .control-row button:not(.reset-btn){flex:0 0 auto;}
+  .binary-row{gap:6px;}
+}
+</style>
+</head>
+<body>
+<div class="container">
+  <header class="page-header">
+    <h1 class="page-title">base <span class="subtitle">converter</span></h1>
+    <div class="page-subtitle">計算過程と構造を確認できる進数変換ツール（β版）</div>
+  </header>
+
+  <div class="tool-grid">
+<div class="section">
+<h2>2進 → 10進</h2>
+<div class="control-row">
+<input id="binaryInput" placeholder="例:1011" onkeydown="handleBinaryKey(event)">
+<button onclick="convertToDecimal()">変換</button>
+<button class="reset-btn" onclick="resetBinary()" title="リセット" aria-label="2進→10進の入力と結果をリセット"><i class="fa fa-refresh"></i></button>
+</div>
+<div id="binaryVisual"></div>
+<div id="binarySteps"></div>
+<div id="binaryResult" class="result"></div>
+<div id="binaryHint"></div>
+</div>
+
+<div class="section">
+<h2>10進 → 2進</h2>
+<div class="control-row">
+<input id="decimalInput" placeholder="例:122" onkeydown="handleDecimalKey(event)">
+<button onclick="convertToBinary()">変換</button>
+<button class="reset-btn" onclick="resetDecimal()" title="リセット" aria-label="10進→2進の入力と結果をリセット"><i class="fa fa-refresh"></i></button>
+</div>
+<div id="decimalSteps"></div>
+<div id="decimalReadGuide"></div>
+<div id="decimalResult" class="result"></div>
+<div id="decimalHint"></div>
+</div>
+
+<div class="section">
+<h2>2進小数 → 10進小数</h2>
+<div class="control-row">
+<input id="binaryFractionInput" placeholder="例:110.11" onkeydown="handleBinaryFractionKey(event)">
+<button onclick="convertBinaryFractionToDecimal()">変換</button>
+<button class="reset-btn" onclick="resetBinaryFraction()" title="リセット" aria-label="2進小数→10進小数の入力と結果をリセット"><i class="fa fa-refresh"></i></button>
+</div>
+<div class="note">整数部分と小数部分に分けて、重みと計算過程を確認します。</div>
+<div id="binaryFractionSplit"></div>
+<div id="binaryFractionVisual"></div>
+<div id="binaryFractionSteps"></div>
+<div id="binaryFractionResult" class="result"></div>
+</div>
+
+<div class="section">
+<h2>10進小数 → 2進小数</h2>
+<div class="control-row">
+<input id="decimalFractionInput" placeholder="例:6.75" onkeydown="handleDecimalFractionKey(event)">
+<button onclick="convertDecimalFractionToBinary()">変換</button>
+<button class="reset-btn" onclick="resetDecimalFraction()" title="リセット" aria-label="10進小数→2進小数の入力と結果をリセット"><i class="fa fa-refresh"></i></button>
+</div>
+<div class="note">整数部分は2で割り、小数部分は2をかけて確認します。</div>
+<div id="decimalFractionSplit"></div>
+<div id="decimalFractionIntegerSteps"></div>
+<div id="decimalFractionFractionSteps"></div>
+<div id="decimalFractionResult" class="result"></div>
+<div id="decimalFractionHint"></div>
+</div>
+
+<div class="section">
+<h2>2進 → 16進</h2>
+<div class="control-row">
+<input id="binaryToHexInput" placeholder="例:11010110" onkeydown="handleBinaryToHexKey(event)">
+<button onclick="convertBinaryToHex()">変換</button>
+<button class="reset-btn" onclick="resetBinaryToHex()" title="リセット" aria-label="2進→16進の入力と結果をリセット"><i class="fa fa-refresh"></i></button>
+</div>
+<div class="note">2進数を右から4ビットずつ区切り、16進数1ケタに変換します。</div>
+<div id="binaryToHexGroup"></div>
+<div id="binaryToHexVisual"></div>
+<div id="binaryToHexResult" class="result"></div>
+</div>
+
+<div class="section">
+<h2>16進 → 2進</h2>
+<div class="control-row">
+<input id="hexToBinaryInput" placeholder="例:D6" onkeydown="handleHexToBinaryKey(event)">
+<button onclick="convertHexToBinary()">変換</button>
+<button class="reset-btn" onclick="resetHexToBinary()" title="リセット" aria-label="16進→2進の入力と結果をリセット"><i class="fa fa-refresh"></i></button>
+</div>
+<div class="note">16進数1ケタを、2進数4ビットに変換します。</div>
+<div id="hexToBinaryVisual"></div>
+<div id="hexToBinaryResult" class="result"></div>
+</div>
+  </div>
+
+  <footer class="footer">
+    <a href="#" class="footer__logo">
+      <img src="https://raw.githubusercontent.com/mar-sander/assets/refs/heads/main/Mlogo3-wh800.png" width="64" alt="MM Logo" />
+    </a>
+    <ul class="footer__navi flex">
+      <li><a href="#" target="_blank">HOME</a></li>
+      <li><a href="https://mar-sander.github.io/count-tool/">文字数</a></li>
+      <li><a href="https://mar-sander.github.io/day-counter/">〆切±</a></li>
+    </ul>
+    <hr />
+    <p class="copyright">Copyright © M.M. All Rights Reserved.</p>
+  </footer>
+</div>
+
+<script>
+function isAllOnes(b){return /^1+$/.test(b)}
+
+function createBinaryVisual(binary){
+ const chars=binary.split("");
+ const max=chars.length-1;
+ let weightRow="";
+ let bitRow="";
+ chars.forEach((bit,index)=>{
+  const power=max-index;
+  const value=2**power;
+  weightRow+=`<span style="display:inline-block; min-width:36px; text-align:center;">${value}</span>`;
+  bitRow+=`<span style="display:inline-block; min-width:36px; text-align:center; ${bit==="1"?"color:#4fc3f7;font-weight:bold;":"color:#666;"}">${bit}</span>`;
+ });
+ return `
+  <div class="binary-visual">
+   <div class="binary-row" style="flex-wrap:wrap;">${weightRow}</div>
+   <div class="binary-row" style="flex-wrap:wrap;">${bitRow}</div>
+  </div>
+ `;
+}
+
+function handleBinaryKey(event){
+ if(event.key === "Enter"){
+  convertToDecimal();
+ }
+}
+
+function handleDecimalKey(event){
+ if(event.key === "Enter"){
+  convertToBinary();
+ }
+}
+
+function handleBinaryFractionKey(event){
+ if(event.key === "Enter"){
+  convertBinaryFractionToDecimal();
+ }
+}
+
+function resetBinary(){
+ document.getElementById("binaryInput").value="";
+ document.getElementById("binaryVisual").innerHTML="";
+ document.getElementById("binarySteps").innerHTML="";
+ document.getElementById("binaryResult").innerHTML="";
+ document.getElementById("binaryHint").innerHTML="";
+}
+
+function resetDecimal(){
+ document.getElementById("decimalInput").value="";
+ document.getElementById("decimalSteps").innerHTML="";
+ document.getElementById("decimalReadGuide").innerHTML="";
+ document.getElementById("decimalResult").innerHTML="";
+ document.getElementById("decimalHint").innerHTML="";
+}
+
+function resetBinaryFraction(){
+ document.getElementById("binaryFractionInput").value="";
+ document.getElementById("binaryFractionSplit").innerHTML="";
+ document.getElementById("binaryFractionVisual").innerHTML="";
+ document.getElementById("binaryFractionSteps").innerHTML="";
+ document.getElementById("binaryFractionResult").innerHTML="";
+}
+
+function convertToDecimal(){
+ const input=document.getElementById("binaryInput").value.trim();
+ const visual=document.getElementById("binaryVisual");
+ const steps=document.getElementById("binarySteps");
+ const result=document.getElementById("binaryResult");
+ const hint=document.getElementById("binaryHint");
+ visual.innerHTML="";
+ steps.innerHTML=result.innerHTML=hint.innerHTML="";
+ if(!/^[01]+$/.test(input)){steps.innerHTML="<div class='error'>2進数を入力してください</div>";return}
+ visual.innerHTML=createBinaryVisual(input);
+ let sum=0;
+ input.split("").reverse().forEach((bit,i)=>{
+  const val=Number(bit)*(2**i);
+  steps.innerHTML+=`<div class="step ${bit==="1"?"highlight":"dim"}">${bit}×2^${i}=${val}</div>`;
+  sum+=val;
+ });
+ result.innerHTML=`= ${sum}`;
+ if(isAllOnes(input)&&input.length>=2){
+  hint.innerHTML=`<div class="note">理解できた人は…</div><button onclick="showAlt('${input}')">裏ワザを見る</button>`;
+ }
+}
+
+function showAlt(binary){
+ const hint=document.getElementById("binaryHint");
+ const n=binary.length;
+ const val=2**n-1;
+ hint.innerHTML=`<div class="hint"><b>裏ワザ</b><br>2^${n}-1 = ${val}<br><button onclick="showAlt2(${n})">さらに別の見方</button></div>`;
+}
+function showAlt2(n){
+ const hint=document.getElementById("binaryHint");
+ hint.innerHTML+=`<div class="hint">1000... = 2^${n}<br>そこから1引く→全部1</div>`;
+}
+
+function convertToBinary(){
+ let num=parseInt(document.getElementById("decimalInput").value);
+ const steps=document.getElementById("decimalSteps");
+ const result=document.getElementById("decimalResult");
+ const guide=document.getElementById("decimalReadGuide");
+ const hint=document.getElementById("decimalHint");
+ steps.innerHTML=result.innerHTML=guide.innerHTML=hint.innerHTML="";
+ if(isNaN(num)||num<0){steps.innerHTML="<div class='error'>10進数を入力してください</div>";return}
+ if(num===0){result.innerHTML="=0";return}
+ let rem=[],cur=num;
+ while(cur>0){
+  let q=Math.floor(cur/2),r=cur%2;
+  steps.innerHTML+=`
+  <div class="step-line">
+    <div class="step-left">${cur} ÷ 2 = ${q} …</div>
+    <div class="step-right highlight">${r}</div>
+  </div>`;
+  rem.push(r);cur=q;
+ }
+ let bin=rem.reverse().join("");
+ guide.innerHTML=`<div class="read-guide">下から読む→<span class="highlight">${bin}</span></div>`;
+ result.innerHTML=`=${bin}`;
+
+ hint.innerHTML=`<div class="note">理解できた人は…</div><button onclick="showDecimalAlt(${num})">裏ワザを見る</button>`;
+}
+
+function showDecimalAlt(num){
+  const hint=document.getElementById("decimalHint");
+  let steps="";
+  let cur=num;
+  let powers=[];
+  while(cur>0){
+    let p=Math.floor(Math.log2(cur));
+    let val=2**p;
+    steps+=`${cur} - ${val} = ${cur-val}<br>`;
+    powers.push(val);
+    cur-=val;
+  }
+  let max=Math.floor(Math.log2(num));
+  let weightRow="";
+  let bitRow="";
+  for(let i=max;i>=0;i--){
+    let val=2**i;
+    weightRow += `<span style="display:inline-block; min-width:36px; text-align:center;">${val}</span>`;
+    bitRow += `<span style="display:inline-block; min-width:36px; text-align:center; ${powers.includes(val)?'color:#4fc3f7;font-weight:bold;':'color:#666;'}">${powers.includes(val)?1:0}</span>`;
+  }
+  hint.innerHTML=`
+ <div class="hint">
+ <b>裏ワザ：重みで考える</b><br>
+ ${steps}<br>
+ <b>対応する重みとビット</b><br>
+ <div class="binary-row" style="margin-top:8px; flex-wrap:wrap;">${weightRow}</div>
+ <div class="binary-row" style="flex-wrap:wrap;">${bitRow}</div>
+ </div>`;
+}
+
+function createWeightRows(bits, weights){
+ let weightRow="";
+ let bitRow="";
+ bits.forEach((bit,index)=>{
+  const isOne = bit === "1";
+  weightRow += `<span style="display:inline-block; min-width:46px; text-align:center;">${weights[index]}</span>`;
+  bitRow += `<span style="display:inline-block; min-width:46px; text-align:center; ${isOne?'color:#4fc3f7;font-weight:bold;':'color:#666;'}">${bit}</span>`;
+ });
+ return `
+  <div class="binary-row" style="flex-wrap:wrap;">${weightRow}</div>
+  <div class="binary-row" style="flex-wrap:wrap;">${bitRow}</div>
+ `;
+}
+
+function createFractionWeightRows(bits){
+ let fractionRow="";
+ let decimalRow="";
+ let bitRow="";
+ bits.forEach((bit,index)=>{
+  const denominator=2**(index+1);
+  const decimalValue=1/denominator;
+  const isOne = bit === "1";
+  fractionRow += `<span style="display:inline-block; min-width:58px; text-align:center;">1/${denominator}</span>`;
+  decimalRow += `<span style="display:inline-block; min-width:58px; text-align:center; color:#bbb;">${decimalValue}</span>`;
+  bitRow += `<span style="display:inline-block; min-width:58px; text-align:center; ${isOne?'color:#4fc3f7;font-weight:bold;':'color:#666;'}">${bit}</span>`;
+ });
+ return `
+  <div class="note">分数</div>
+  <div class="binary-row" style="flex-wrap:wrap;">${fractionRow}</div>
+  <div class="note">小数</div>
+  <div class="binary-row" style="flex-wrap:wrap;">${decimalRow}</div>
+  <div class="note">ビット</div>
+  <div class="binary-row" style="flex-wrap:wrap;">${bitRow}</div>
+ `;
+}
+
+function convertBinaryFractionToDecimal(){
+ const input=document.getElementById("binaryFractionInput").value.trim();
+ const split=document.getElementById("binaryFractionSplit");
+ const visual=document.getElementById("binaryFractionVisual");
+ const steps=document.getElementById("binaryFractionSteps");
+ const result=document.getElementById("binaryFractionResult");
+ split.innerHTML="";
+ visual.innerHTML="";
+ steps.innerHTML="";
+ result.innerHTML="";
+
+ if(!/^[01]+\.[01]+$/.test(input)){
+  steps.innerHTML="<div class='error'>整数部分と小数部分を含む2進数を入力してください。例：110.11</div>";
+  return;
+ }
+
+ const parts=input.split(".");
+ const integerPart=parts[0];
+ const fractionPart=parts[1];
+
+ split.innerHTML=`
+  <div class="read-guide">
+   <strong>【分けて考える】</strong><br>
+   整数部分：<span class="highlight">${integerPart}</span><br>
+   小数部分：<span class="highlight">.${fractionPart}</span>
+  </div>`;
+
+ const integerBits=integerPart.split("");
+ const integerMax=integerBits.length-1;
+ const integerWeights=integerBits.map((bit,index)=>String(2**(integerMax-index)));
+ const fractionBits=fractionPart.split("");
+ const fractionWeights=fractionBits.map((bit,index)=>`1/${2**(index+1)}`);
+
+ visual.innerHTML=`
+  <div class="binary-visual">
+   <strong>整数部分の重み</strong>
+   ${createWeightRows(integerBits, integerWeights)}
+  </div>
+  <div class="binary-visual">
+   <strong>小数部分の重み</strong>
+   ${createFractionWeightRows(fractionBits)}
+  </div>`;
+
+ let integerSum=0;
+ let integerTerms=[];
+ integerBits.forEach((bit,index)=>{
+  const power=integerMax-index;
+  const value=Number(bit)*(2**power);
+  integerTerms.push(value);
+  integerSum+=value;
+ });
+
+ let fractionSum=0;
+ let fractionTerms=[];
+ let fractionDetail=[];
+ fractionBits.forEach((bit,index)=>{
+  const denominator=2**(index+1);
+  const value=Number(bit)/denominator;
+  fractionTerms.push(value);
+  fractionDetail.push(`${bit}×1/${denominator}=${value}`);
+  fractionSum+=value;
+ });
+
+ const total=integerSum+fractionSum;
+ steps.innerHTML=`
+  <div class="hint">
+   <strong>【計算過程】</strong><br>
+   整数部分：${integerTerms.join(" + ")} = ${integerSum}<br>
+   小数部分：${fractionDetail.join(" + ")} = ${fractionSum}<br>
+  </div>`;
+
+ result.innerHTML=`${integerSum} + ${fractionSum} = ${total}`;
+}
+
+function handleDecimalFractionKey(event){
+ if(event.key === "Enter"){
+  convertDecimalFractionToBinary();
+ }
+}
+
+function resetDecimalFraction(){
+ document.getElementById("decimalFractionInput").value="";
+ document.getElementById("decimalFractionSplit").innerHTML="";
+ document.getElementById("decimalFractionIntegerSteps").innerHTML="";
+ document.getElementById("decimalFractionFractionSteps").innerHTML="";
+ document.getElementById("decimalFractionResult").innerHTML="";
+ document.getElementById("decimalFractionHint").innerHTML="";
+}
+
+function convertIntegerPartToBinaryStepsForFraction(num){
+ if(num===0){
+  return {
+   binary:"0",
+   html:`<div class="read-guide">整数部分 0 は、そのまま <span class="highlight">0</span> です。</div>`
+  };
+ }
+
+ let remainders=[];
+ let current=num;
+ let html=`<div class="hint"><strong>【整数部分】2で割る</strong><br>`;
+
+ while(current>0){
+  const quotient=Math.floor(current/2);
+  const remainder=current%2;
+  html+=`
+   <div class="step-line">
+    <div class="step-left">${current} ÷ 2 = ${quotient} …</div>
+    <div class="step-right highlight">${remainder}</div>
+   </div>`;
+  remainders.push(remainder);
+  current=quotient;
+ }
+
+ const binary=remainders.reverse().join("");
+ html+=`<div class="note">余りを下から読む → <span class="highlight">${binary}</span></div></div>`;
+ return {binary, html};
+}
+
+function convertFractionPartToBinarySteps(fraction){
+ let bits=[];
+ let current=fraction;
+ const maxSteps=12;
+ let count=0;
+ let html=`<div class="hint"><strong>【小数部分】2をかける</strong><br>`;
+
+ while(current>0 && count<maxSteps){
+  const doubled=Number((current*2).toFixed(12));
+  const bit=Math.floor(doubled);
+  const next=Number((doubled-bit).toFixed(12));
+
+  html+=`
+   <div class="step-line">
+    <div class="step-left">${current} × 2 = ${doubled} …</div>
+    <div class="step-right highlight">${bit}</div>
+   </div>`;
+
+  bits.push(bit);
+  current=next;
+  count++;
+ }
+
+ const binary=bits.join("") || "0";
+ html+=`<div class="note">右側の整数部を上から読む → <span class="highlight">.${binary}</span></div>`;
+
+ if(current!==0){
+  html+=`<div class="note">※小数部分が続くため、${maxSteps}桁で打ち切っています。</div>`;
+ }
+
+ html+=`</div>`;
+ return {binary, html, stopped:current!==0};
+}
+
+function convertDecimalFractionToBinary(){
+ const input=document.getElementById("decimalFractionInput").value.trim();
+ const split=document.getElementById("decimalFractionSplit");
+ const integerSteps=document.getElementById("decimalFractionIntegerSteps");
+ const fractionSteps=document.getElementById("decimalFractionFractionSteps");
+ const result=document.getElementById("decimalFractionResult");
+ const hint=document.getElementById("decimalFractionHint");
+
+ split.innerHTML="";
+ integerSteps.innerHTML="";
+ fractionSteps.innerHTML="";
+ result.innerHTML="";
+ hint.innerHTML="";
+
+ const decimalPattern=new RegExp("^[0-9]+[.][0-9]+$");
+ if(!decimalPattern.test(input)){
+  integerSteps.innerHTML="<div class='error'>整数部分と小数部分を含む10進数を入力してください。例：6.75</div>";
+  return;
+ }
+
+ const parts=input.split(".");
+ const integerPart=Number(parts[0]);
+ const fractionPart=Number("0."+parts[1]);
+
+ split.innerHTML=`
+  <div class="read-guide">
+   <strong>【分けて考える】</strong><br>
+   整数部分：<span class="highlight">${integerPart}</span><br>
+   小数部分：<span class="highlight">0.${parts[1]}</span>
+  </div>`;
+
+ const integerResult=convertIntegerPartToBinaryStepsForFraction(integerPart);
+ const fractionResult=convertFractionPartToBinarySteps(fractionPart);
+
+ integerSteps.innerHTML=integerResult.html;
+ fractionSteps.innerHTML=fractionResult.html;
+ result.innerHTML=`${integerPart} + ${fractionPart} → <span class="highlight">${integerResult.binary}.${fractionResult.binary}</span>`;
+ hint.innerHTML=`<div class="note">理解できた人は…</div><button onclick="showDecimalFractionWeightAlt(${integerPart}, ${fractionPart})">裏ワザを見る</button>`;
+}
+
+function showDecimalFractionWeightAlt(integerPart, fractionPart){
+ const hint=document.getElementById("decimalFractionHint");
+ const total=integerPart+fractionPart;
+
+ let remaining=total;
+ let maxPower=Math.floor(Math.log2(total));
+ let steps="";
+ let weightRow="";
+ let decimalRow="";
+ let bitRow="";
+ let resultBits=[];
+
+ for(let power=maxPower; power>=-12; power--){
+  const weight=2**power;
+  const label=power>=0 ? String(weight) : `1/${2**Math.abs(power)}`;
+  const decimalLabel=power>=0 ? String(weight) : String(weight);
+  const canUse=remaining+1e-12 >= weight;
+  const bit=canUse ? 1 : 0;
+
+  if(canUse){
+   const next=Number((remaining-weight).toFixed(12));
+   steps+=`${remaining} - ${label} = ${next}<br>`;
+   remaining=next;
+  }
+
+  weightRow+=`<span style="display:inline-block; min-width:58px; text-align:center;">${label}</span>`;
+  decimalRow+=`<span style="display:inline-block; min-width:58px; text-align:center; color:#bbb;">${decimalLabel}</span>`;
+  bitRow+=`<span style="display:inline-block; min-width:58px; text-align:center; ${bit===1?'color:#4fc3f7;font-weight:bold;':'color:#666;'}">${bit}</span>`;
+  resultBits.push(bit);
+
+  if(power<0 && remaining===0){
+   break;
+  }
+ }
+
+ const decimalPointIndex=maxPower+1;
+ let binary=resultBits.slice(0, decimalPointIndex).join("") + "." + resultBits.slice(decimalPointIndex).join("");
+ if(binary.endsWith(".")) binary=binary.slice(0,-1);
+
+ hint.innerHTML=`
+ <div class="hint">
+  <b>裏ワザ：重みで考える</b><br>
+  使える重みを大きい方から選び、引いていきます。<br><br>
+  ${steps}<br>
+  <b>対応する重みとビット</b><br>
+  <div class="note">分数・整数</div>
+  <div class="binary-row" style="margin-top:8px; flex-wrap:wrap;">${weightRow}</div>
+  <div class="note">小数値</div>
+  <div class="binary-row" style="flex-wrap:wrap;">${decimalRow}</div>
+  <div class="note">ビット</div>
+  <div class="binary-row" style="flex-wrap:wrap;">${bitRow}</div>
+  <div class="note">重みを使ったところが 1、使わなかったところが 0 です。</div>
+  <div class="result">答え：<span class="highlight">${binary}</span></div>
+ </div>`;
+}
+
+const binToHexMap={
+ "0000":"0","0001":"1","0010":"2","0011":"3",
+ "0100":"4","0101":"5","0110":"6","0111":"7",
+ "1000":"8","1001":"9","1010":"A","1011":"B",
+ "1100":"C","1101":"D","1110":"E","1111":"F"
+};
+
+const hexToBinMap={
+ "0":"0000","1":"0001","2":"0010","3":"0011",
+ "4":"0100","5":"0101","6":"0110","7":"0111",
+ "8":"1000","9":"1001","A":"1010","B":"1011",
+ "C":"1100","D":"1101","E":"1110","F":"1111"
+};
+
+function handleBinaryToHexKey(event){
+ if(event.key === "Enter"){
+  convertBinaryToHex();
+ }
+}
+
+function handleHexToBinaryKey(event){
+ if(event.key === "Enter"){
+  convertHexToBinary();
+ }
+}
+
+function resetBinaryToHex(){
+ document.getElementById("binaryToHexInput").value="";
+ document.getElementById("binaryToHexGroup").innerHTML="";
+ document.getElementById("binaryToHexVisual").innerHTML="";
+ document.getElementById("binaryToHexResult").innerHTML="";
+}
+
+function resetHexToBinary(){
+ document.getElementById("hexToBinaryInput").value="";
+ document.getElementById("hexToBinaryVisual").innerHTML="";
+ document.getElementById("hexToBinaryResult").innerHTML="";
+}
+
+function splitBinaryIntoNibbles(binary){
+ const padding=(4 - (binary.length % 4)) % 4;
+ const padded="0".repeat(padding)+binary;
+ const groups=[];
+ for(let i=0;i<padded.length;i+=4){
+  groups.push(padded.slice(i,i+4));
+ }
+ return {padding,padded,groups};
+}
+
+function formatPaddedBinary(padded,padding){
+ return padded.split("").map((bit,index)=>{
+  const style=index<padding ? "color:#666;" : "color:#4fc3f7;font-weight:bold;";
+  return `<span style="${style}">${bit}</span>`;
+ }).join("");
+}
+
+function convertBinaryToHex(){
+ const input=document.getElementById("binaryToHexInput").value.trim();
+ const group=document.getElementById("binaryToHexGroup");
+ const visual=document.getElementById("binaryToHexVisual");
+ const result=document.getElementById("binaryToHexResult");
+ group.innerHTML="";
+ visual.innerHTML="";
+ result.innerHTML="";
+
+ if(!/^[01]+$/.test(input)){
+  group.innerHTML="<div class='error'>2進数を入力してください。</div>";
+  return;
+ }
+
+ const data=splitBinaryIntoNibbles(input);
+ const hexDigits=data.groups.map(bits=>binToHexMap[bits]);
+
+ group.innerHTML=`
+  <div class="read-guide">
+   <strong>【4ビットずつ区切る】</strong><br>
+   2進数は右から4ビットずつ区切ります。<br>
+   ${data.padding>0 ? `足りない左側には <span class="dim">0</span> を ${data.padding}個 補います。<br>` : ""}
+   <span style="letter-spacing:0.12em;">${formatPaddedBinary(data.padded,data.padding)}</span>
+  </div>`;
+
+ let binaryRow="";
+ let hexRow="";
+ data.groups.forEach((bits,index)=>{
+  const displayBits=bits.split("").map((bit,bitIndex)=>{
+   const globalIndex=index*4+bitIndex;
+   const style=globalIndex<data.padding ? "color:#666;" : "color:#4fc3f7;font-weight:bold;";
+   return `<span style="${style}">${bit}</span>`;
+  }).join("");
+  binaryRow+=`<span style="display:inline-block; min-width:72px; text-align:center;">${displayBits}</span>`;
+  hexRow+=`<span style="display:inline-block; min-width:72px; text-align:center; color:#4fc3f7; font-weight:bold;">${hexDigits[index]}</span>`;
+ });
+
+ visual.innerHTML=`
+  <div class="binary-visual">
+   <strong>【4ビット → 16進1ケタ】</strong>
+   <div class="binary-row" style="flex-wrap:wrap;">${binaryRow}</div>
+   <div class="binary-row" style="flex-wrap:wrap;">${hexRow}</div>
+  </div>`;
+
+ result.innerHTML=`答え：<span class="highlight">${hexDigits.join("")}</span>`;
+}
+
+function convertHexToBinary(){
+ const input=document.getElementById("hexToBinaryInput").value.trim().toUpperCase();
+ const visual=document.getElementById("hexToBinaryVisual");
+ const result=document.getElementById("hexToBinaryResult");
+ visual.innerHTML="";
+ result.innerHTML="";
+
+ if(!/^[0-9A-F]+$/.test(input)){
+  visual.innerHTML="<div class='error'>16進数を入力してください。使用できる文字は 0〜9, A〜F です。</div>";
+  return;
+ }
+
+ const hexDigits=input.split("");
+ const binaryGroups=hexDigits.map(hex=>hexToBinMap[hex]);
+ let hexRow="";
+ let binaryRow="";
+
+ hexDigits.forEach((hex,index)=>{
+  hexRow+=`<span style="display:inline-block; min-width:72px; text-align:center; color:#4fc3f7; font-weight:bold;">${hex}</span>`;
+  binaryRow+=`<span style="display:inline-block; min-width:72px; text-align:center;">${binaryGroups[index]}</span>`;
+ });
+
+ visual.innerHTML=`
+  <div class="binary-visual">
+   <strong>【16進1ケタ → 2進4ビット】</strong>
+   <div class="binary-row" style="flex-wrap:wrap;">${hexRow}</div>
+   <div class="binary-row" style="flex-wrap:wrap;">${binaryRow}</div>
+  </div>`;
+
+ result.innerHTML=`答え：<span class="highlight">${binaryGroups.join("")}</span>`;
+}
+
+</script>
+
+</body>
+</html>
