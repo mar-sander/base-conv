@@ -263,7 +263,7 @@ hr{
 <button onclick="convertBinaryFractionToDecimal()">変換</button>
 <button class="reset-btn" onclick="resetBinaryFraction()" title="リセット" aria-label="2進小数→10進小数の入力と結果をリセット"><i class="fa fa-refresh"></i></button>
 </div>
-<div class="note">整数部分と小数部分に分けて考えます。</div>
+<div class="note">整数部分と小数部分に分けて、重みと計算過程を確認します。</div>
 <div id="binaryFractionSplit"></div>
 <div id="binaryFractionVisual"></div>
 <div id="binaryFractionSteps"></div>
@@ -277,7 +277,7 @@ hr{
 <button onclick="convertDecimalFractionToBinary()">変換</button>
 <button class="reset-btn" onclick="resetDecimalFraction()" title="リセット" aria-label="10進小数→2進小数の入力と結果をリセット"><i class="fa fa-refresh"></i></button>
 </div>
-<div class="note">整数部分は2で割り、小数部分は2をかけます。</div>
+<div class="note">整数部分は2で割り、小数部分は2をかけて確認します。</div>
 <div id="decimalFractionSplit"></div>
 <div id="decimalFractionIntegerSteps"></div>
 <div id="decimalFractionFractionSteps"></div>
@@ -292,7 +292,7 @@ hr{
 <button onclick="convertBinaryToHex()">変換</button>
 <button class="reset-btn" onclick="resetBinaryToHex()" title="リセット" aria-label="2進→16進の入力と結果をリセット"><i class="fa fa-refresh"></i></button>
 </div>
-<div class="note">2進数を4ビットずつ区切り16進数に変換します。</div>
+<div class="note">2進数を右から4ビットずつ区切り、16進数1ケタに変換します。</div>
 <div id="binaryToHexGroup"></div>
 <div id="binaryToHexVisual"></div>
 <div id="binaryToHexResult" class="result"></div>
@@ -305,9 +305,34 @@ hr{
 <button onclick="convertHexToBinary()">変換</button>
 <button class="reset-btn" onclick="resetHexToBinary()" title="リセット" aria-label="16進→2進の入力と結果をリセット"><i class="fa fa-refresh"></i></button>
 </div>
-<div class="note">16進数を2進数4ビットに変換します。</div>
+<div class="note">16進数1ケタを、2進数4ビットに変換します。</div>
 <div id="hexToBinaryVisual"></div>
 <div id="hexToBinaryResult" class="result"></div>
+</div>
+
+<div class="section">
+<h2>2進小数 → 16進小数</h2>
+<div class="control-row">
+<input id="binaryFractionToHexInput" placeholder="例:110.11" onkeydown="handleBinaryFractionToHexKey(event)">
+<button onclick="convertBinaryFractionToHex()">変換</button>
+<button class="reset-btn" onclick="resetBinaryFractionToHex()" title="リセット" aria-label="2進小数→16進小数の入力と結果をリセット"><i class="fa fa-refresh"></i></button>
+</div>
+<div class="note">小数点を基準に、整数部分は右から4ビット、小数部分は左から4ビットずつ区切ります。</div>
+<div id="binaryFractionToHexGuide"></div>
+<div id="binaryFractionToHexVisual"></div>
+<div id="binaryFractionToHexResult" class="result"></div>
+</div>
+
+<div class="section">
+<h2>16進小数 → 2進小数</h2>
+<div class="control-row">
+<input id="hexFractionToBinaryInput" placeholder="例:6.C" onkeydown="handleHexFractionToBinaryKey(event)">
+<button onclick="convertHexFractionToBinary()">変換</button>
+<button class="reset-btn" onclick="resetHexFractionToBinary()" title="リセット" aria-label="16進小数→2進小数の入力と結果をリセット"><i class="fa fa-refresh"></i></button>
+</div>
+<div class="note">16進数1ケタを、2進数4ビットに変換します。小数部分も同じ考え方です。</div>
+<div id="hexFractionToBinaryVisual"></div>
+<div id="hexFractionToBinaryResult" class="result"></div>
 </div>
   </div>
 
@@ -895,6 +920,185 @@ function convertHexToBinary(){
   </div>`;
 
  result.innerHTML=`答え：<span class="highlight">${binaryGroups.join("")}</span>`;
+}
+
+function handleBinaryFractionToHexKey(event){
+ if(event.key === "Enter"){
+  convertBinaryFractionToHex();
+ }
+}
+
+function handleHexFractionToBinaryKey(event){
+ if(event.key === "Enter"){
+  convertHexFractionToBinary();
+ }
+}
+
+function resetBinaryFractionToHex(){
+ document.getElementById("binaryFractionToHexInput").value="";
+ document.getElementById("binaryFractionToHexGuide").innerHTML="";
+ document.getElementById("binaryFractionToHexVisual").innerHTML="";
+ document.getElementById("binaryFractionToHexResult").innerHTML="";
+}
+
+function resetHexFractionToBinary(){
+ document.getElementById("hexFractionToBinaryInput").value="";
+ document.getElementById("hexFractionToBinaryVisual").innerHTML="";
+ document.getElementById("hexFractionToBinaryResult").innerHTML="";
+}
+
+function padLeftToNibble(binary){
+ const padding=(4-(binary.length%4))%4;
+ return {padding:padding, padded:"0".repeat(padding)+binary};
+}
+
+function padRightToNibble(binary){
+ const padding=(4-(binary.length%4))%4;
+ return {padding:padding, padded:binary+"0".repeat(padding)};
+}
+
+function splitEveryFour(str){
+ const groups=[];
+ for(let i=0;i<str.length;i+=4){
+  groups.push(str.slice(i,i+4));
+ }
+ return groups;
+}
+
+function convertBinaryFractionToHex(){
+ const input=document.getElementById("binaryFractionToHexInput").value.trim();
+ const guide=document.getElementById("binaryFractionToHexGuide");
+ const visual=document.getElementById("binaryFractionToHexVisual");
+ const result=document.getElementById("binaryFractionToHexResult");
+ guide.innerHTML="";
+ visual.innerHTML="";
+ result.innerHTML="";
+
+ const binaryFractionPattern=new RegExp("^[01]+[.][01]+$");
+ if(!binaryFractionPattern.test(input)){
+  guide.innerHTML="<div class='error'>整数部分と小数部分を含む2進数を入力してください。例：110.11</div>";
+  return;
+ }
+
+ const parts=input.split(".");
+ const integerPart=parts[0];
+ const fractionPart=parts[1];
+ const integerData=padLeftToNibble(integerPart);
+ const fractionData=padRightToNibble(fractionPart);
+ const integerGroups=splitEveryFour(integerData.padded);
+ const fractionGroups=splitEveryFour(fractionData.padded);
+ const integerHex=integerGroups.map(bits=>binToHexMap[bits]);
+ const fractionHex=fractionGroups.map(bits=>binToHexMap[bits]);
+
+ guide.innerHTML=`
+  <div class="read-guide">
+   <strong>【小数点を基準に区切る】</strong><br>
+   整数部分：右から4ビットずつ区切ります。<br>
+   小数部分：左から4ビットずつ区切ります。<br>
+   ${integerData.padding>0 ? `整数部分の左側に <span class="dim">0</span> を ${integerData.padding}個 補います。<br>` : ""}
+   ${fractionData.padding>0 ? `小数部分の右側に <span class="dim">0</span> を ${fractionData.padding}個 補います。` : ""}
+  </div>`;
+
+ let integerBinaryRow="";
+ let integerHexRow="";
+ integerGroups.forEach((bits,index)=>{
+  const displayBits=bits.split("").map((bit,bitIndex)=>{
+   const globalIndex=index*4+bitIndex;
+   const style=globalIndex<integerData.padding ? "color:#666;" : "color:#4fc3f7;font-weight:bold;";
+   return `<span style="${style}">${bit}</span>`;
+  }).join("");
+  integerBinaryRow+=`<span style="display:inline-block; min-width:72px; text-align:center;">${displayBits}</span>`;
+  integerHexRow+=`<span style="display:inline-block; min-width:72px; text-align:center; color:#4fc3f7; font-weight:bold;">${integerHex[index]}</span>`;
+ });
+
+ let fractionBinaryRow="";
+ let fractionHexRow="";
+ fractionGroups.forEach((bits,index)=>{
+  const displayBits=bits.split("").map((bit,bitIndex)=>{
+   const globalIndex=index*4+bitIndex;
+   const style=globalIndex>=fractionPart.length ? "color:#666;" : "color:#4fc3f7;font-weight:bold;";
+   return `<span style="${style}">${bit}</span>`;
+  }).join("");
+  fractionBinaryRow+=`<span style="display:inline-block; min-width:72px; text-align:center;">${displayBits}</span>`;
+  fractionHexRow+=`<span style="display:inline-block; min-width:72px; text-align:center; color:#4fc3f7; font-weight:bold;">${fractionHex[index]}</span>`;
+ });
+
+ visual.innerHTML=`
+  <div class="binary-visual">
+   <strong>【整数部分：4ビット → 16進1ケタ】</strong>
+   <div class="binary-row" style="flex-wrap:wrap;">${integerBinaryRow}</div>
+   <div class="binary-row" style="flex-wrap:wrap;">${integerHexRow}</div>
+  </div>
+  <div class="binary-visual">
+   <strong>【小数部分：4ビット → 16進1ケタ】</strong>
+   <div class="binary-row" style="flex-wrap:wrap;">${fractionBinaryRow}</div>
+   <div class="binary-row" style="flex-wrap:wrap;">${fractionHexRow}</div>
+  </div>`;
+
+ result.innerHTML=`答え：<span class="highlight">${integerHex.join("")}.${fractionHex.join("")}</span>`;
+}
+
+function trimBinaryIntegerPart(bits){
+ const trimmed=bits.replace(/^0+(?=[0-9])/, "");
+ return trimmed==="" ? "0" : trimmed;
+}
+
+function trimBinaryFractionPart(bits){
+ const trimmed=bits.replace(/0+$/, "");
+ return trimmed==="" ? "0" : trimmed;
+}
+
+function convertHexFractionToBinary(){
+ const input=document.getElementById("hexFractionToBinaryInput").value.trim().toUpperCase();
+ const visual=document.getElementById("hexFractionToBinaryVisual");
+ const result=document.getElementById("hexFractionToBinaryResult");
+ visual.innerHTML="";
+ result.innerHTML="";
+
+ const hexFractionPattern=new RegExp("^[0-9A-F]+[.][0-9A-F]+$");
+ if(!hexFractionPattern.test(input)){
+  visual.innerHTML="<div class='error'>整数部分と小数部分を含む16進数を入力してください。例：6.C</div>";
+  return;
+ }
+
+ const parts=input.split(".");
+ const integerHexDigits=parts[0].split("");
+ const fractionHexDigits=parts[1].split("");
+ const integerBinaryGroups=integerHexDigits.map(hex=>hexToBinMap[hex]);
+ const fractionBinaryGroups=fractionHexDigits.map(hex=>hexToBinMap[hex]);
+
+ let integerHexRow="";
+ let integerBinaryRow="";
+ integerHexDigits.forEach((hex,index)=>{
+  integerHexRow+=`<span style="display:inline-block; min-width:72px; text-align:center; color:#4fc3f7; font-weight:bold;">${hex}</span>`;
+  integerBinaryRow+=`<span style="display:inline-block; min-width:72px; text-align:center;">${integerBinaryGroups[index]}</span>`;
+ });
+
+ let fractionHexRow="";
+ let fractionBinaryRow="";
+ fractionHexDigits.forEach((hex,index)=>{
+  fractionHexRow+=`<span style="display:inline-block; min-width:72px; text-align:center; color:#4fc3f7; font-weight:bold;">${hex}</span>`;
+  fractionBinaryRow+=`<span style="display:inline-block; min-width:72px; text-align:center;">${fractionBinaryGroups[index]}</span>`;
+ });
+
+ const fullIntegerBinary=integerBinaryGroups.join("");
+ const fullFractionBinary=fractionBinaryGroups.join("");
+ const trimmedInteger=trimBinaryIntegerPart(fullIntegerBinary);
+ const trimmedFraction=trimBinaryFractionPart(fullFractionBinary);
+
+ visual.innerHTML=`
+  <div class="binary-visual">
+   <strong>【整数部分：16進1ケタ → 2進4ビット】</strong>
+   <div class="binary-row" style="flex-wrap:wrap;">${integerHexRow}</div>
+   <div class="binary-row" style="flex-wrap:wrap;">${integerBinaryRow}</div>
+  </div>
+  <div class="binary-visual">
+   <strong>【小数部分：16進1ケタ → 2進4ビット】</strong>
+   <div class="binary-row" style="flex-wrap:wrap;">${fractionHexRow}</div>
+   <div class="binary-row" style="flex-wrap:wrap;">${fractionBinaryRow}</div>
+  </div>`;
+
+ result.innerHTML=`答え：<span class="highlight">${trimmedInteger}.${trimmedFraction}</span>`;
 }
 
 </script>
