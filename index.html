@@ -233,37 +233,17 @@ hr{
 <div class="section">
 <h2>2進 → 10進</h2>
 <div class="control-row">
-<input id="binaryInput" placeholder="例:1011" onkeydown="handleBinaryKey(event)">
-<button onclick="convertToDecimal()">変換</button>
-<button class="reset-btn" onclick="resetBinary()" title="リセット" aria-label="2進→10進の入力と結果をリセット"><i class="fa fa-refresh"></i></button>
+<input id="binaryUnifiedInput" placeholder="例:1011 / 110.11" onkeydown="handleBinaryUnifiedKey(event)">
+<button onclick="convertBinaryToDecimalAuto()">変換</button>
+<button class="reset-btn" onclick="resetBinaryToDecimalAuto()" title="リセット" aria-label="2進→10進の入力と結果をリセット"><i class="fa fa-refresh"></i></button>
 </div>
+<div class="note">小数点なしなら整数、小数点ありなら小数として、ツールが自動で判別します。</div>
+<input id="binaryInput" type="hidden">
+<input id="binaryFractionInput" type="hidden">
 <div id="binaryVisual"></div>
 <div id="binarySteps"></div>
 <div id="binaryResult" class="result"></div>
 <div id="binaryHint"></div>
-</div>
-
-<div class="section">
-<h2>10進 → 2進</h2>
-<div class="control-row">
-<input id="decimalInput" placeholder="例:122" onkeydown="handleDecimalKey(event)">
-<button onclick="convertToBinary()">変換</button>
-<button class="reset-btn" onclick="resetDecimal()" title="リセット" aria-label="10進→2進の入力と結果をリセット"><i class="fa fa-refresh"></i></button>
-</div>
-<div id="decimalSteps"></div>
-<div id="decimalReadGuide"></div>
-<div id="decimalResult" class="result"></div>
-<div id="decimalHint"></div>
-</div>
-
-<div class="section">
-<h2>2進小数 → 10進小数</h2>
-<div class="control-row">
-<input id="binaryFractionInput" placeholder="例:110.11" onkeydown="handleBinaryFractionKey(event)">
-<button onclick="convertBinaryFractionToDecimal()">変換</button>
-<button class="reset-btn" onclick="resetBinaryFraction()" title="リセット" aria-label="2進小数→10進小数の入力と結果をリセット"><i class="fa fa-refresh"></i></button>
-</div>
-<div class="note">整数部分と小数部分に分けて、重みと計算過程を確認します。</div>
 <div id="binaryFractionSplit"></div>
 <div id="binaryFractionVisual"></div>
 <div id="binaryFractionSteps"></div>
@@ -271,13 +251,19 @@ hr{
 </div>
 
 <div class="section">
-<h2>10進小数 → 2進小数</h2>
+<h2>10進 → 2進</h2>
 <div class="control-row">
-<input id="decimalFractionInput" placeholder="例:6.75" onkeydown="handleDecimalFractionKey(event)">
-<button onclick="convertDecimalFractionToBinary()">変換</button>
-<button class="reset-btn" onclick="resetDecimalFraction()" title="リセット" aria-label="10進小数→2進小数の入力と結果をリセット"><i class="fa fa-refresh"></i></button>
+<input id="decimalUnifiedInput" placeholder="例:122 / 6.75" onkeydown="handleDecimalUnifiedKey(event)">
+<button onclick="convertDecimalToBinaryAuto()">変換</button>
+<button class="reset-btn" onclick="resetDecimalToBinaryAuto()" title="リセット" aria-label="10進→2進の入力と結果をリセット"><i class="fa fa-refresh"></i></button>
 </div>
-<div class="note">整数部分は2で割り、小数部分は2をかけて確認します。</div>
+<div class="note">小数点なしなら整数、小数点ありなら小数として、ツールが自動で判別します。</div>
+<input id="decimalInput" type="hidden">
+<input id="decimalFractionInput" type="hidden">
+<div id="decimalSteps"></div>
+<div id="decimalReadGuide"></div>
+<div id="decimalResult" class="result"></div>
+<div id="decimalHint"></div>
 <div id="decimalFractionSplit"></div>
 <div id="decimalFractionIntegerSteps"></div>
 <div id="decimalFractionFractionSteps"></div>
@@ -288,49 +274,33 @@ hr{
 <div class="section">
 <h2>2進 → 16進</h2>
 <div class="control-row">
-<input id="binaryToHexInput" placeholder="例:11010110" onkeydown="handleBinaryToHexKey(event)">
-<button onclick="convertBinaryToHex()">変換</button>
-<button class="reset-btn" onclick="resetBinaryToHex()" title="リセット" aria-label="2進→16進の入力と結果をリセット"><i class="fa fa-refresh"></i></button>
+<input id="binaryToHexUnifiedInput" placeholder="例:11010110 / 110.11" onkeydown="handleBinaryToHexUnifiedKey(event)">
+<button onclick="convertBinaryToHexAuto()">変換</button>
+<button class="reset-btn" onclick="resetBinaryToHexAuto()" title="リセット" aria-label="2進→16進の入力と結果をリセット"><i class="fa fa-refresh"></i></button>
 </div>
-<div class="note">2進数を右から4ビットずつ区切り、16進数1ケタに変換します。</div>
+<div class="note">小数点なしなら整数、小数点ありなら小数として、4ビット単位で変換します。</div>
+<input id="binaryToHexInput" type="hidden">
+<input id="binaryFractionToHexInput" type="hidden">
 <div id="binaryToHexGroup"></div>
 <div id="binaryToHexVisual"></div>
 <div id="binaryToHexResult" class="result"></div>
-</div>
-
-<div class="section">
-<h2>16進 → 2進</h2>
-<div class="control-row">
-<input id="hexToBinaryInput" placeholder="例:D6" onkeydown="handleHexToBinaryKey(event)">
-<button onclick="convertHexToBinary()">変換</button>
-<button class="reset-btn" onclick="resetHexToBinary()" title="リセット" aria-label="16進→2進の入力と結果をリセット"><i class="fa fa-refresh"></i></button>
-</div>
-<div class="note">16進数1ケタを、2進数4ビットに変換します。</div>
-<div id="hexToBinaryVisual"></div>
-<div id="hexToBinaryResult" class="result"></div>
-</div>
-
-<div class="section">
-<h2>2進小数 → 16進小数</h2>
-<div class="control-row">
-<input id="binaryFractionToHexInput" placeholder="例:110.11" onkeydown="handleBinaryFractionToHexKey(event)">
-<button onclick="convertBinaryFractionToHex()">変換</button>
-<button class="reset-btn" onclick="resetBinaryFractionToHex()" title="リセット" aria-label="2進小数→16進小数の入力と結果をリセット"><i class="fa fa-refresh"></i></button>
-</div>
-<div class="note">小数点を基準に、整数部分は右から4ビット、小数部分は左から4ビットずつ区切ります。</div>
 <div id="binaryFractionToHexGuide"></div>
 <div id="binaryFractionToHexVisual"></div>
 <div id="binaryFractionToHexResult" class="result"></div>
 </div>
 
 <div class="section">
-<h2>16進小数 → 2進小数</h2>
+<h2>16進 → 2進</h2>
 <div class="control-row">
-<input id="hexFractionToBinaryInput" placeholder="例:6.C" onkeydown="handleHexFractionToBinaryKey(event)">
-<button onclick="convertHexFractionToBinary()">変換</button>
-<button class="reset-btn" onclick="resetHexFractionToBinary()" title="リセット" aria-label="16進小数→2進小数の入力と結果をリセット"><i class="fa fa-refresh"></i></button>
+<input id="hexToBinaryUnifiedInput" placeholder="例:D6 / 6.C" onkeydown="handleHexToBinaryUnifiedKey(event)">
+<button onclick="convertHexToBinaryAuto()">変換</button>
+<button class="reset-btn" onclick="resetHexToBinaryAuto()" title="リセット" aria-label="16進→2進の入力と結果をリセット"><i class="fa fa-refresh"></i></button>
 </div>
-<div class="note">16進数1ケタを、2進数4ビットに変換します。小数部分も同じ考え方です。</div>
+<div class="note">小数点なしなら整数、小数点ありなら小数として、16進数1ケタを2進数4ビットへ変換します。</div>
+<input id="hexToBinaryInput" type="hidden">
+<input id="hexFractionToBinaryInput" type="hidden">
+<div id="hexToBinaryVisual"></div>
+<div id="hexToBinaryResult" class="result"></div>
 <div id="hexFractionToBinaryVisual"></div>
 <div id="hexFractionToBinaryResult" class="result"></div>
 </div>
@@ -1099,6 +1069,153 @@ function convertHexFractionToBinary(){
   </div>`;
 
  result.innerHTML=`答え：<span class="highlight">${trimmedInteger}.${trimmedFraction}</span>`;
+}
+
+function clearBinaryToDecimalOutputs(){
+ document.getElementById("binaryVisual").innerHTML="";
+ document.getElementById("binarySteps").innerHTML="";
+ document.getElementById("binaryResult").innerHTML="";
+ document.getElementById("binaryHint").innerHTML="";
+ document.getElementById("binaryFractionSplit").innerHTML="";
+ document.getElementById("binaryFractionVisual").innerHTML="";
+ document.getElementById("binaryFractionSteps").innerHTML="";
+ document.getElementById("binaryFractionResult").innerHTML="";
+}
+
+function clearDecimalToBinaryOutputs(){
+ document.getElementById("decimalSteps").innerHTML="";
+ document.getElementById("decimalReadGuide").innerHTML="";
+ document.getElementById("decimalResult").innerHTML="";
+ document.getElementById("decimalHint").innerHTML="";
+ document.getElementById("decimalFractionSplit").innerHTML="";
+ document.getElementById("decimalFractionIntegerSteps").innerHTML="";
+ document.getElementById("decimalFractionFractionSteps").innerHTML="";
+ document.getElementById("decimalFractionResult").innerHTML="";
+ document.getElementById("decimalFractionHint").innerHTML="";
+}
+
+function clearBinaryToHexOutputs(){
+ document.getElementById("binaryToHexGroup").innerHTML="";
+ document.getElementById("binaryToHexVisual").innerHTML="";
+ document.getElementById("binaryToHexResult").innerHTML="";
+ document.getElementById("binaryFractionToHexGuide").innerHTML="";
+ document.getElementById("binaryFractionToHexVisual").innerHTML="";
+ document.getElementById("binaryFractionToHexResult").innerHTML="";
+}
+
+function clearHexToBinaryOutputs(){
+ document.getElementById("hexToBinaryVisual").innerHTML="";
+ document.getElementById("hexToBinaryResult").innerHTML="";
+ document.getElementById("hexFractionToBinaryVisual").innerHTML="";
+ document.getElementById("hexFractionToBinaryResult").innerHTML="";
+}
+
+function handleBinaryUnifiedKey(event){
+ if(event.key === "Enter") convertBinaryToDecimalAuto();
+}
+
+function handleDecimalUnifiedKey(event){
+ if(event.key === "Enter") convertDecimalToBinaryAuto();
+}
+
+function handleBinaryToHexUnifiedKey(event){
+ if(event.key === "Enter") convertBinaryToHexAuto();
+}
+
+function handleHexToBinaryUnifiedKey(event){
+ if(event.key === "Enter") convertHexToBinaryAuto();
+}
+
+function resetBinaryToDecimalAuto(){
+ document.getElementById("binaryUnifiedInput").value="";
+ document.getElementById("binaryInput").value="";
+ document.getElementById("binaryFractionInput").value="";
+ clearBinaryToDecimalOutputs();
+}
+
+function resetDecimalToBinaryAuto(){
+ document.getElementById("decimalUnifiedInput").value="";
+ document.getElementById("decimalInput").value="";
+ document.getElementById("decimalFractionInput").value="";
+ clearDecimalToBinaryOutputs();
+}
+
+function resetBinaryToHexAuto(){
+ document.getElementById("binaryToHexUnifiedInput").value="";
+ document.getElementById("binaryToHexInput").value="";
+ document.getElementById("binaryFractionToHexInput").value="";
+ clearBinaryToHexOutputs();
+}
+
+function resetHexToBinaryAuto(){
+ document.getElementById("hexToBinaryUnifiedInput").value="";
+ document.getElementById("hexToBinaryInput").value="";
+ document.getElementById("hexFractionToBinaryInput").value="";
+ clearHexToBinaryOutputs();
+}
+
+function convertBinaryToDecimalAuto(){
+ const input=document.getElementById("binaryUnifiedInput").value.trim();
+ clearBinaryToDecimalOutputs();
+ if(/^[01]+$/.test(input)){
+  document.getElementById("binaryInput").value=input;
+  convertToDecimal();
+ }
+ else if(/^[01]+[.][01]+$/.test(input)){
+  document.getElementById("binaryFractionInput").value=input;
+  convertBinaryFractionToDecimal();
+ }
+ else{
+  document.getElementById("binarySteps").innerHTML="<div class='error'>2進数を入力してください。例：1011 / 110.11</div>";
+ }
+}
+
+function convertDecimalToBinaryAuto(){
+ const input=document.getElementById("decimalUnifiedInput").value.trim();
+ clearDecimalToBinaryOutputs();
+ if(/^[0-9]+$/.test(input)){
+  document.getElementById("decimalInput").value=input;
+  convertToBinary();
+ }
+ else if(/^[0-9]+[.][0-9]+$/.test(input)){
+  document.getElementById("decimalFractionInput").value=input;
+  convertDecimalFractionToBinary();
+ }
+ else{
+  document.getElementById("decimalSteps").innerHTML="<div class='error'>10進数を入力してください。例：122 / 6.75</div>";
+ }
+}
+
+function convertBinaryToHexAuto(){
+ const input=document.getElementById("binaryToHexUnifiedInput").value.trim();
+ clearBinaryToHexOutputs();
+ if(/^[01]+$/.test(input)){
+  document.getElementById("binaryToHexInput").value=input;
+  convertBinaryToHex();
+ }
+ else if(/^[01]+[.][01]+$/.test(input)){
+  document.getElementById("binaryFractionToHexInput").value=input;
+  convertBinaryFractionToHex();
+ }
+ else{
+  document.getElementById("binaryToHexGroup").innerHTML="<div class='error'>2進数を入力してください。例：11010110 / 110.11</div>";
+ }
+}
+
+function convertHexToBinaryAuto(){
+ const input=document.getElementById("hexToBinaryUnifiedInput").value.trim().toUpperCase();
+ clearHexToBinaryOutputs();
+ if(/^[0-9A-F]+$/.test(input)){
+  document.getElementById("hexToBinaryInput").value=input;
+  convertHexToBinary();
+ }
+ else if(/^[0-9A-F]+[.][0-9A-F]+$/.test(input)){
+  document.getElementById("hexFractionToBinaryInput").value=input;
+  convertHexFractionToBinary();
+ }
+ else{
+  document.getElementById("hexToBinaryVisual").innerHTML="<div class='error'>16進数を入力してください。例：D6 / 6.C</div>";
+ }
 }
 
 </script>
